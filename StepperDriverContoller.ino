@@ -92,9 +92,9 @@ void init_easyDriver()
 }
 
 
-void set_target_position(uint32_t position)
+void set_target_position(uint32_t new_position)
 {
-  target_position = position; 
+  target_position = new_position; 
 }
 
 void set_step_delay(uint32_t step_delay)
@@ -124,7 +124,7 @@ void movement_start_check()
   if(!moving){
     digitalWrite(SLEEP, HIGH);
     digitalWrite(ENABLE, LOW);
-    delay(100);
+    delay(10);
   }
 }
 
@@ -146,13 +146,12 @@ void regulate_position()
 {
   if(target_position == current_position) {
     if(moving)  {
+      delay(200);
       digitalWrite(ENABLE, HIGH);
       digitalWrite(SLEEP, LOW);
       moving =  false;
     }
-    return;
-  }
-  if(target_position == INIT_POSITION) {
+  }else if(target_position == INIT_POSITION) {
     turn_cw();
     current_position = 0;
   }else if(target_position > current_position) {

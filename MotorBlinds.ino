@@ -19,7 +19,7 @@
 #define LONG_PRESS 5000
 #define INIT_POSITION 0xFFFFFFFF
 
-unsigned long sig_up, sig_down;
+unsigned long sig_up, sig_down, sig_up2, sig_down2;
 unsigned long button_up_pressed_start = 0;
 unsigned long button_down_pressed_start = 0;
 
@@ -77,7 +77,7 @@ void up_command()
 void down_command()
 {
   set_step_delay(200);
-  set_target_position(12000);
+  set_target_position(12900);
 }
 
 void command_init()
@@ -115,7 +115,7 @@ void check_buttons()
     } else if(millis() > button_down_pressed_start + 2000 && digitalRead(BTN_UP) == BTN_PRESS)  {
       button_down_pressed_start = 0;
       button_up_pressed_start = 0;
-      while (!digitalRead(BTN_UP) || !digitalRead(BTN_DOWN))
+      while (digitalRead(BTN_UP) == BTN_PRESS || digitalRead(BTN_DOWN) == BTN_PRESS)
       {
         digitalWrite(LED, HIGH);
         delay(100);
@@ -123,6 +123,7 @@ void check_buttons()
       delay(1000);
       Serial.println("Init up");
       command_init();
+      digitalWrite(LED, LOW);
     }
   } else {
     if(button_down_pressed_start != 0) {
@@ -136,13 +137,13 @@ void check_buttons()
 void check_IR()
 {
   if (irrecv.decode(&results)) {
-    Serial.println(results.value, HEX);
-    if (results.value == sig_up)
+    //Serial.println(results.value, HEX);
+    if (results.value == sig_up || results.value == sig_up2)
     {
       Serial.println("IR up");
       up_command();
     }
-    if ( results.value == sig_down)
+    if ( results.value == sig_down || results.value == sig_down2)
     {
       Serial.println("IR down");
       down_command();
@@ -174,7 +175,8 @@ void setup()
   //write_long_EEPROM(EEPROM_ADDR_2,0xFF4AB5);
   sig_up = read_long_EEPROM(EEPROM_ADDR_1);
   sig_down = read_long_EEPROM(EEPROM_ADDR_2);
-
+  sig_up2 = 0xFF18E7;
+  sig_down2 = 0xFF4AB5;
 }
 
 void loop() {
